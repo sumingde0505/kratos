@@ -118,10 +118,15 @@ func WithNamespace(path string) ClientOption {
 	return func(e *Client) { e.eurekaPath = path }
 }
 
+func WithIpAsHostName(ipAsHostname bool) ClientOption {
+	return func(e *Client) { e.ipAsHostname = ipAsHostname }
+}
+
 type Client struct {
 	ctx               context.Context
 	urls              []string
 	eurekaPath        string
+	ipAsHostname      bool
 	maxRetry          int
 	heartbeatInterval time.Duration
 	client            *http.Client
@@ -234,7 +239,9 @@ func (e *Client) registerEndpoint(ctx context.Context, ep Endpoint) error {
 			Metadata: ep.MetaData,
 		},
 	}
-
+	if e.ipAsHostname {
+		instance.Instance.HostName = ep.IP
+	}
 	body, err := json.Marshal(instance)
 	if err != nil {
 		return err

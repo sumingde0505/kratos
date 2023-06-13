@@ -34,12 +34,17 @@ func WithEurekaPath(path string) Option {
 	return func(o *Registry) { o.eurekaPath = path }
 }
 
+func WithIpAsHostname(ipAsHostname bool) Option {
+	return func(o *Registry) { o.ipAsHostname = ipAsHostname }
+}
+
 type Registry struct {
 	ctx               context.Context
 	api               *API
 	heartbeatInterval time.Duration
 	refreshInterval   time.Duration
 	eurekaPath        string
+	ipAsHostname      bool
 }
 
 func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
@@ -54,7 +59,7 @@ func New(eurekaUrls []string, opts ...Option) (*Registry, error) {
 		o(r)
 	}
 
-	client := NewClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithClientContext(r.ctx), WithNamespace(r.eurekaPath))
+	client := NewClient(eurekaUrls, WithHeartbeatInterval(r.heartbeatInterval), WithClientContext(r.ctx), WithNamespace(r.eurekaPath), WithIpAsHostName(r.ipAsHostname))
 	r.api = NewAPI(r.ctx, client, r.refreshInterval)
 	return r, nil
 }
